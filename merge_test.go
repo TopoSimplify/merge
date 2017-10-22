@@ -9,7 +9,12 @@ import (
 	"github.com/franela/goblin"
 	"simplex/split"
 	"simplex/dp"
+	"github.com/intdxdt/sset"
+	"github.com/intdxdt/cmp"
+	"simplex/node"
 )
+
+const epsilonDist = 1.0e-5
 
 //@formatter:off
 func TestMergeHull(t *testing.T) {
@@ -27,6 +32,10 @@ func TestMergeHull(t *testing.T) {
 				GeomRelation:           true,
 				DistRelation:           false,
 				DirRelation:            false,
+			}
+			//checks if score is valid at threshold of constrained dp
+			var is_score_relate_valid = func (val float64) bool {
+				return val <= options.Threshold
 			}
 
 			// self.relates = relations(self)
@@ -50,25 +59,33 @@ func TestMergeHull(t *testing.T) {
 			}
 			hulldb.Load(boxes)
 
-			//vertex_set := sset.NewSSet(cmp.Int)
-			//var unmerged = make(map[[2]int]*node.Node,0)
-			//keep, rm := homo.merge_contiguous_fragments_by_size(splits, hulldb, vertex_set, unmerged, 1)
-			//g.Assert(len(keep)).Equal(2)
-			//g.Assert(len(rm)).Equal(2)
-			//
-			//splits  = split.AtIndex(homo, hull, []int{0, 5, 6, 7, 8, 12}, hullGeom)
-			//g.Assert(len(splits)).Equal(5)
-			//
-			//hulldb  = rtree.NewRTree(8)
-			//boxes   = make([]rtree.BoxObj, len(splits))
-			//for i, v := range splits {boxes[i] = v}
-			//hulldb.Load(boxes)
-			//
-			//vertex_set = sset.NewSSet(cmp.Int)
-			//unmerged = make(map[[2]int]*node.Node,0)
-			//keep, rm = homo.merge_contiguous_fragments_by_size(splits, hulldb, vertex_set, unmerged, 1)
-			//g.Assert(len(keep)).Equal(3)
-			//g.Assert(len(rm)).Equal(4)
+			vertex_set := sset.NewSSet(cmp.Int)
+			var unmerged = make(map[[2]int]*node.Node,0)
+
+			keep, rm := ContiguousFragmentsBySize(
+				homo, splits, hulldb, vertex_set, unmerged, 1,
+				is_score_relate_valid, hullGeom, epsilonDist)
+
+			g.Assert(len(keep)).Equal(2)
+			g.Assert(len(rm)).Equal(2)
+
+			splits  = split.AtIndex(homo, hull, []int{0, 5, 6, 7, 8, 12}, hullGeom)
+			g.Assert(len(splits)).Equal(5)
+
+			hulldb  = rtree.NewRTree(8)
+			boxes   = make([]rtree.BoxObj, len(splits))
+			for i, v := range splits {boxes[i] = v}
+			hulldb.Load(boxes)
+
+			vertex_set = sset.NewSSet(cmp.Int)
+			unmerged = make(map[[2]int]*node.Node,0)
+
+			keep, rm = ContiguousFragmentsBySize(
+				homo, splits, hulldb, vertex_set, unmerged, 1,
+				is_score_relate_valid, hullGeom, epsilonDist)
+
+			g.Assert(len(keep)).Equal(3)
+			g.Assert(len(rm)).Equal(4)
 		})
 	})
 }
