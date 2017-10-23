@@ -5,9 +5,9 @@ import (
 	"simplex/rng"
 	"simplex/node"
 	"simplex/lnr"
+	"simplex/knn"
 	"github.com/intdxdt/sset"
 	"github.com/intdxdt/rtree"
-	"simplex/knn"
 	"github.com/intdxdt/geom"
 )
 

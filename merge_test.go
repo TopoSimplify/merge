@@ -34,7 +34,7 @@ func TestMergeHull(t *testing.T) {
 				DirRelation:            false,
 			}
 			//checks if score is valid at threshold of constrained dp
-			var is_score_relate_valid = func (val float64) bool {
+			var isScoreRelateValid = func (val float64) bool {
 				return val <= options.Threshold
 			}
 
@@ -64,7 +64,7 @@ func TestMergeHull(t *testing.T) {
 
 			keep, rm := ContiguousFragmentsBySize(
 				homo, splits, hulldb, vertex_set, unmerged, 1,
-				is_score_relate_valid, hullGeom, epsilonDist)
+				isScoreRelateValid, hullGeom, epsilonDist)
 
 			g.Assert(len(keep)).Equal(2)
 			g.Assert(len(rm)).Equal(2)
@@ -82,7 +82,7 @@ func TestMergeHull(t *testing.T) {
 
 			keep, rm = ContiguousFragmentsBySize(
 				homo, splits, hulldb, vertex_set, unmerged, 1,
-				is_score_relate_valid, hullGeom, epsilonDist)
+				isScoreRelateValid, hullGeom, epsilonDist)
 
 			g.Assert(len(keep)).Equal(3)
 			g.Assert(len(rm)).Equal(4)
