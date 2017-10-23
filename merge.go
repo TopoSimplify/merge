@@ -11,8 +11,6 @@ import (
 	"github.com/intdxdt/geom"
 )
 
-type scoreRelationFn func(float64) bool
-
 func sortInts(iter []int) []int {
 	sort.Ints(iter)
 	return iter
@@ -36,7 +34,7 @@ func Range(ra, rb *rng.Range) *rng.Range {
 
 //Merge contiguous fragments based combined score
 func ContiguousFragmentsAtThreshold(self lnr.Linear, ha, hb *node.Node,
-	scoreRelation scoreRelationFn, gfn geom.GeometryFn) *node.Node {
+	scoreRelation func(float64) bool, gfn geom.GeometryFn) *node.Node {
 	_, val := self.Score(self, Range(ha.Range, hb.Range))
 	if scoreRelation(val) {
 		return ContiguousFragments(self, ha, hb, gfn)
@@ -55,7 +53,7 @@ func ContiguousFragments(self lnr.Linear, ha, hb *node.Node, gfn geom.GeometryFn
 func ContiguousFragmentsBySize(self lnr.Linear,
 	hulls []*node.Node, hulldb *rtree.RTree, vertexSet *sset.SSet,
 	unmerged map[[2]int]*node.Node, fragmentSize int,
-	isScoreValid scoreRelationFn, gfn geom.GeometryFn, EpsilonDist float64,
+	isScoreValid func(float64) bool, gfn geom.GeometryFn, EpsilonDist float64,
 ) ([]*node.Node, []*node.Node) {
 
 	//@formatter:off
