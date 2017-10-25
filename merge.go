@@ -46,7 +46,7 @@ func ContiguousFragmentsAtThreshold(self lnr.Linear, ha, hb *node.Node,
 func ContiguousFragments(self lnr.Linear, ha, hb *node.Node, gfn geom.GeometryFn) *node.Node {
 	var r = Range(ha.Range, hb.Range)
 	// i...[ha]...k...[hb]...j
-	return node.New(self.Polyline(), r, gfn)
+	return node.NewFromPolyline(self.Polyline(), r, gfn)
 }
 
 //Merge contiguous hulls by fragment size
@@ -121,7 +121,7 @@ func ContiguousFragmentsBySize(self lnr.Linear,
 			delete(hdict, hr.AsArray())
 
 			// add merge
-			hdict[r.AsArray()] = node.New(pln, r, gfn)
+			hdict[r.AsArray()] = node.NewFromPolyline(pln, r, gfn)
 
 			// add to remove list to remove , after merge
 			rm = append(rm, s)
