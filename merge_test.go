@@ -3,21 +3,21 @@ package merge
 import (
 	"time"
 	"testing"
-	"simplex/opts"
-	"simplex/offset"
-	"github.com/intdxdt/rtree"
-	"github.com/franela/goblin"
-	"simplex/split"
 	"simplex/dp"
-	"github.com/intdxdt/sset"
-	"github.com/intdxdt/cmp"
 	"simplex/node"
+	"simplex/opts"
+	"simplex/split"
+	"simplex/offset"
+	"github.com/intdxdt/cmp"
+	"github.com/intdxdt/sset"
+	"github.com/franela/goblin"
+	"github.com/intdxdt/rtree"
 )
 
 const epsilonDist = 1.0e-5
 
 //@formatter:off
-func TestMergeHull(t *testing.T) {
+func TestMergeNode(t *testing.T) {
 	g := goblin.Goblin(t)
 	g.Describe("test merge hull", func() {
 		g.It("should test merge", func() {
@@ -39,21 +39,22 @@ func TestMergeHull(t *testing.T) {
 			}
 
 			// self.relates = relations(self)
-			wkt := "LINESTRING ( 860 390, 810 360, 770 400, 760 420, 800 440, 810 470, 850 500, 810 530, 780 570, 760 530, 720 530, 710 500, 650 450 )"
-			coords := linear_coords(wkt)
-			n := len(coords) - 1
-			homo := dp.New(coords, options, offset.MaxOffset)
+			var wkt = "LINESTRING ( 860 390, 810 360, 770 400, 760 420, 800 440, 810 470, 850 500, 810 530, 780 570, 760 530, 720 530, 710 500, 650 450 )"
+			var coords = linearCoords(wkt)
+			var n = len(coords) - 1
+			var homo = dp.New(coords, options, offset.MaxOffset)
 
-			hull := create_hulls([][]int{{0, n}}, coords)[0]
-			ha, hb := split.AtScoreSelection(hull, homo.Score, hullGeom)
-			splits := split.AtIndex( hull, []int{
+			var hull = createHulls([][]int{{0, n}}, coords)[0]
+			var ha, hb = split.AtScoreSelection(hull, homo.Score, hullGeom)
+			var splits = split.AtIndex(hull, []int{
 				ha.Range.I(), ha.Range.J(), hb.Range.I(),
 				hb.Range.I() - 1, hb.Range.J(),
 			}, hullGeom)
+
 			g.Assert(len(splits)).Equal(3)
 
-			hulldb := rtree.NewRTree(8)
-			boxes := make([]rtree.BoxObj, len(splits))
+			var hulldb = rtree.NewRTree(8)
+			var boxes = make([]rtree.BoxObj, len(splits))
 			for i, v := range splits {
 				boxes[i] = v
 			}
@@ -62,9 +63,9 @@ func TestMergeHull(t *testing.T) {
 			vertex_set := sset.NewSSet(cmp.Int)
 			var unmerged = make(map[[2]int]*node.Node, 0)
 
-			keep, rm := ContiguousFragmentsBySize(
+			var keep, rm = ContiguousFragmentsBySize(
 				splits, hulldb, vertex_set, unmerged, 1,
-				isScoreRelateValid, homo.Score,hullGeom, epsilonDist)
+				isScoreRelateValid, homo.Score, hullGeom, epsilonDist)
 
 			g.Assert(len(keep)).Equal(2)
 			g.Assert(len(rm)).Equal(2)
@@ -74,9 +75,7 @@ func TestMergeHull(t *testing.T) {
 
 			hulldb = rtree.NewRTree(8)
 			boxes = make([]rtree.BoxObj, len(splits))
-			for i, v := range splits {
-				boxes[i] = v
-			}
+			for i, v := range splits {boxes[i] = v}
 			hulldb.Load(boxes)
 
 			vertex_set = sset.NewSSet(cmp.Int)

@@ -55,7 +55,7 @@ func ContiguousCoordinates(ha, hb *node.Node) []*geom.Point {
 	var nodes = node.NewNodes().Push(ha).Push(hb).Sort()
 	var na, nb = nodes.Get(0), nodes.Get(1)
 	var coordinates = na.Coordinates()
-	var n = len(coordinates)
+	var n = len(coordinates)-1
 	coordinates = append(coordinates[:n:n], nb.Coordinates()...)
 	return coordinates
 }
@@ -123,8 +123,9 @@ func ContiguousFragmentsBySize(
 			//tests for contiguous and whether contiguous index is part of vertex set
 			//if the location at which they are contiguous is not part of vertex set then
 			//its mergeable : mergeable score <= threshold
-			var mergeable = (hr.J() == sr.I() && !vertexSet.Contains(sr.I())) ||
-				(hr.I() == sr.J() && !vertexSet.Contains(sr.J()))
+			var mergeable = (
+				(hr.J() == sr.I() && !vertexSet.Contains(sr.I())) ||
+				(hr.I() == sr.J() && !vertexSet.Contains(sr.J())))
 
 			if mergeable {
 				var _, val = scoreFn(ContiguousCoordinates(s, h))
