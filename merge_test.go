@@ -34,19 +34,19 @@ func TestMergeHull(t *testing.T) {
 				DirRelation:            false,
 			}
 			//checks if score is valid at threshold of constrained dp
-			var isScoreRelateValid = func (val float64) bool {
+			var isScoreRelateValid = func(val float64) bool {
 				return val <= options.Threshold
 			}
 
 			// self.relates = relations(self)
-			wkt     := "LINESTRING ( 860 390, 810 360, 770 400, 760 420, 800 440, 810 470, 850 500, 810 530, 780 570, 760 530, 720 530, 710 500, 650 450 )"
-			coords  := linear_coords(wkt)
-			n       := len(coords) - 1
-			homo    := dp.New(coords,  options, offset.MaxOffset)
+			wkt := "LINESTRING ( 860 390, 810 360, 770 400, 760 420, 800 440, 810 470, 850 500, 810 530, 780 570, 760 530, 720 530, 710 500, 650 450 )"
+			coords := linear_coords(wkt)
+			n := len(coords) - 1
+			homo := dp.New(coords, options, offset.MaxOffset)
 
-			hull    := create_hulls([][]int{{0, n}}, coords)[0]
-			ha, hb  := split.AtScoreSelection(homo, hull, hullGeom)
-			splits  := split.AtIndex(homo, hull, []int{
+			hull := create_hulls([][]int{{0, n}}, coords)[0]
+			ha, hb := split.AtScoreSelection(hull, homo.Score, hullGeom)
+			splits := split.AtIndex( hull, []int{
 				ha.Range.I(), ha.Range.J(), hb.Range.I(),
 				hb.Range.I() - 1, hb.Range.J(),
 			}, hullGeom)
@@ -60,29 +60,31 @@ func TestMergeHull(t *testing.T) {
 			hulldb.Load(boxes)
 
 			vertex_set := sset.NewSSet(cmp.Int)
-			var unmerged = make(map[[2]int]*node.Node,0)
+			var unmerged = make(map[[2]int]*node.Node, 0)
 
 			keep, rm := ContiguousFragmentsBySize(
-				homo, splits, hulldb, vertex_set, unmerged, 1,
-				isScoreRelateValid, hullGeom, epsilonDist)
+				splits, hulldb, vertex_set, unmerged, 1,
+				isScoreRelateValid, homo.Score,hullGeom, epsilonDist)
 
 			g.Assert(len(keep)).Equal(2)
 			g.Assert(len(rm)).Equal(2)
 
-			splits  = split.AtIndex(homo, hull, []int{0, 5, 6, 7, 8, 12}, hullGeom)
+			splits = split.AtIndex(hull, []int{0, 5, 6, 7, 8, 12}, hullGeom)
 			g.Assert(len(splits)).Equal(5)
 
-			hulldb  = rtree.NewRTree(8)
-			boxes   = make([]rtree.BoxObj, len(splits))
-			for i, v := range splits {boxes[i] = v}
+			hulldb = rtree.NewRTree(8)
+			boxes = make([]rtree.BoxObj, len(splits))
+			for i, v := range splits {
+				boxes[i] = v
+			}
 			hulldb.Load(boxes)
 
 			vertex_set = sset.NewSSet(cmp.Int)
-			unmerged = make(map[[2]int]*node.Node,0)
+			unmerged = make(map[[2]int]*node.Node, 0)
 
 			keep, rm = ContiguousFragmentsBySize(
-				homo, splits, hulldb, vertex_set, unmerged, 1,
-				isScoreRelateValid, hullGeom, epsilonDist)
+				splits, hulldb, vertex_set, unmerged, 1,
+				isScoreRelateValid, homo.Score, hullGeom, epsilonDist)
 
 			g.Assert(len(keep)).Equal(3)
 			g.Assert(len(rm)).Equal(4)

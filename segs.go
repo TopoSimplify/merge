@@ -11,7 +11,7 @@ import (
 )
 
 //Merge segment fragments where possible
-func SimpleSegments(self lnr.Linear, nodedb *rtree.RTree,
+func SimpleSegments(scoreFn lnr.ScoreFn, nodedb *rtree.RTree,
 	constVertexSet *sset.SSet, scoreRelation scoreRelationFn,
 	validateMerge func(node *node.Node, nodedb *rtree.RTree) bool) {
 
@@ -53,7 +53,7 @@ func SimpleSegments(self lnr.Linear, nodedb *rtree.RTree,
 			key = cacheKey(prev, hull)
 			if !cache[key] {
 				addToMergeCache(cache, &key)
-				mergePrev = ContiguousFragmentsAtThreshold(self, prev, hull, scoreRelation, dp.NodeGeometry)
+				mergePrev = ContiguousFragmentsAtThreshold(scoreFn, prev, hull, scoreRelation, dp.NodeGeometry)
 			}
 		}
 
@@ -61,7 +61,7 @@ func SimpleSegments(self lnr.Linear, nodedb *rtree.RTree,
 			key = cacheKey(hull, nxt)
 			if !cache[key] {
 				addToMergeCache(cache, &key)
-				mergeNxt = ContiguousFragmentsAtThreshold(self, hull, nxt, scoreRelation, dp.NodeGeometry)
+				mergeNxt = ContiguousFragmentsAtThreshold(scoreFn, hull, nxt, scoreRelation, dp.NodeGeometry)
 			}
 		}
 
