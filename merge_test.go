@@ -10,8 +10,8 @@ import (
 	"simplex/offset"
 	"github.com/intdxdt/cmp"
 	"github.com/intdxdt/sset"
-	"github.com/franela/goblin"
 	"github.com/intdxdt/rtree"
+	"github.com/franela/goblin"
 )
 
 const epsilonDist = 1.0e-5
@@ -20,8 +20,47 @@ const epsilonDist = 1.0e-5
 func TestMergeNode(t *testing.T) {
 	g := goblin.Goblin(t)
 	g.Describe("test merge hull", func() {
-		g.It("should test merge", func() {
+		g.It("should test merge at threshold", func() {
+			//checks if score is valid at threshold of constrained dp
+			var coords = linearCoords("LINESTRING ( 960 840, 980 840, 980 880, 1020 900, 1080 880, 1120 860, 1160 800, 1160 760, 1140 700, 1080 700, 1040 720, 1060 760, 1120 800, 1080 840, 1020 820, 940 760 )")
+			var hulls = createHulls([][]int{{0, 2}, {2, 6}, {6, 8}, {8, 10}, {10, 12}, {12, len(coords) - 1}}, coords)
+			var gfn = hullGeom
+			var n = ContiguousFragmentsAtThreshold(offset.MaxOffset, hulls[0], hulls[1], func(val float64) bool {
+				return val <= 50.0
+			}, gfn)
+			g.Assert(n == nil)
+			n = ContiguousFragmentsAtThreshold(offset.MaxOffset, hulls[0], hulls[1], func(val float64) bool {
+				return val <= 100.0
+			}, gfn)
+			g.Assert(n != nil)
 
+			g.Assert(ContiguousCoordinates(hulls[0], hulls[1])).Equal(coords[0:hulls[1].Range.J()+1])
+			g.Assert(ContiguousCoordinates(hulls[2], hulls[1])).Equal(coords[hulls[1].Range.I():hulls[2].Range.J()+1])
+		})
+		g.It("should test merge non contiguous", func() {
+			defer func() {
+				g.Assert(recover() != nil)
+			}()
+			//checks if score is valid at threshold of constrained dp
+			var coords = linearCoords("LINESTRING ( 960 840, 980 840, 980 880, 1020 900, 1080 880, 1120 860, 1160 800, 1160 760, 1140 700, 1080 700, 1040 720, 1060 760, 1120 800, 1080 840, 1020 820, 940 760 )")
+			var hulls = createHulls([][]int{{0, 2}, {2, 6}, {6, 8}, {8, 10}, {10, 12}, {12, len(coords) - 1}}, coords)
+			var gfn = hullGeom
+			ContiguousFragmentsAtThreshold(offset.MaxOffset, hulls[0], hulls[2], func(val float64) bool {
+				return val <= 100.0
+			}, gfn)
+
+		})
+		g.It("should test merge non contiguous coords", func() {
+			defer func() {
+				g.Assert(recover() != nil)
+			}()
+			//checks if score is valid at threshold of constrained dp
+			var coords = linearCoords("LINESTRING ( 960 840, 980 840, 980 880, 1020 900, 1080 880, 1120 860, 1160 800, 1160 760, 1140 700, 1080 700, 1040 720, 1060 760, 1120 800, 1080 840, 1020 820, 940 760 )")
+			var hulls = createHulls([][]int{{0, 2}, {2, 6}, {6, 8}, {8, 10}, {10, 12}, {12, len(coords) - 1}}, coords)
+			ContiguousCoordinates(hulls[0], hulls[2])
+		})
+
+		g.It("should test merge", func() {
 			g.Timeout(1 * time.Hour)
 			options := &opts.Opts{
 				Threshold:              50.0,
@@ -75,7 +114,9 @@ func TestMergeNode(t *testing.T) {
 
 			hulldb = rtree.NewRTree(8)
 			boxes = make([]rtree.BoxObj, len(splits))
-			for i, v := range splits {boxes[i] = v}
+			for i, v := range splits {
+				boxes[i] = v
+			}
 			hulldb.Load(boxes)
 
 			vertex_set = sset.NewSSet(cmp.Int)
