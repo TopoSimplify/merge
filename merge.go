@@ -1,90 +1,91 @@
 package merge
 
 import (
-	"sort"
-	"simplex/rng"
-	"simplex/node"
-	"simplex/lnr"
-	"simplex/knn"
-	"github.com/intdxdt/sset"
-	"github.com/intdxdt/rtree"
-	"github.com/intdxdt/geom"
+    "sort"
+    "simplex/rng"
+    "simplex/node"
+    "simplex/lnr"
+    "simplex/knn"
+    "simplex/db"
+    "github.com/intdxdt/sset"
+    "github.com/intdxdt/rtree"
+    "github.com/intdxdt/geom"
 )
 
 func sortInts(iter []int) []int {
-	sort.Ints(iter)
-	return iter
+    sort.Ints(iter)
+    return iter
 }
 
 //node.Nodes from Rtree boxes
 func nodesFromBoxes(iter []rtree.BoxObj) *node.Nodes {
-	var self = node.NewNodes(len(iter))
-	for _, h := range iter {
-		self.Push(h.(*node.Node))
-	}
-	return self
+    var self = node.NewNodes(len(iter))
+    for _, h := range iter {
+        self.Push(h.(*node.Node))
+    }
+    return self
 }
 
 //Merge two ranges
 func Range(ra, rb *rng.Range) *rng.Range {
-	var ranges = sortInts(append(ra.AsSlice(), rb.AsSlice()...))
-	// i...[ra]...k...[rb]...j
-	return rng.NewRange(ranges[0], ranges[len(ranges)-1])
+    var ranges = sortInts(append(ra.AsSlice(), rb.AsSlice()...))
+    // i...[ra]...k...[rb]...j
+    return rng.NewRange(ranges[0], ranges[len(ranges)-1])
 }
 
 //Merge contiguous fragments based combined score
 func ContiguousFragmentsAtThreshold(
-	scoreFn lnr.ScoreFn, ha, hb *node.Node,
-	scoreRelation func(float64) bool, gfn geom.GeometryFn,
+    scoreFn lnr.ScoreFn, ha, hb *node.Node,
+    scoreRelation func(float64) bool, gfn geom.GeometryFn,
 ) *node.Node {
-	if !ha.Range.Contiguous(hb.Range) {
-		panic("node are not contiguous")
-	}
-	var coordinates = ContiguousCoordinates(ha, hb)
-	_, val := scoreFn(coordinates)
-	if scoreRelation(val) {
-		return contiguousFragments(coordinates, ha, hb, gfn)
-	}
-	return nil
+    if !ha.Range.Contiguous(hb.Range) {
+        panic("node are not contiguous")
+    }
+    var coordinates = ContiguousCoordinates(ha, hb)
+    _, val := scoreFn(coordinates)
+    if scoreRelation(val) {
+        return contiguousFragments(coordinates, ha, hb, gfn)
+    }
+    return nil
 }
 
 func ContiguousCoordinates(ha, hb *node.Node) []*geom.Point {
-	if !ha.Range.Contiguous(hb.Range) {
-		panic("node are not contiguous")
-	}
-	var nodes = node.NewNodes().Push(ha).Push(hb).Sort()
-	var na, nb = nodes.Get(0), nodes.Get(1)
-	var coordinates = na.Coordinates()
-	var n = len(coordinates)-1
-	coordinates = append(coordinates[:n:n], nb.Coordinates()...)
-	return coordinates
+    if !ha.Range.Contiguous(hb.Range) {
+        panic("node are not contiguous")
+    }
+    var nodes = node.NewNodes().Push(ha).Push(hb).Sort()
+    var na, nb = nodes.Get(0), nodes.Get(1)
+    var coordinates = na.Coordinates()
+    var n = len(coordinates) - 1
+    coordinates = append(coordinates[:n:n], nb.Coordinates()...)
+    return coordinates
 }
 
 //Merge contiguous hulls
 func contiguousFragments(
-	coordinates []*geom.Point,
-	ha, hb *node.Node,
-	gfn geom.GeometryFn,
+    coordinates []*geom.Point,
+    ha, hb *node.Node,
+    gfn geom.GeometryFn,
 ) *node.Node {
-	var r = Range(ha.Range, hb.Range)
-	// i...[ha]...k...[hb]...j
-	return node.New(coordinates, r, gfn)
+    var r = Range(ha.Range, hb.Range)
+    // i...[ha]...k...[hb]...j
+    return node.New(coordinates, r, gfn)
 }
 
 //Merge contiguous hulls by fragment size
 func ContiguousFragmentsBySize(
-	hulls []*node.Node,
-	hulldb *rtree.RTree,
-	vertexSet *sset.SSet,
-	unmerged map[[2]int]*node.Node,
-	fragmentSize int,
-	isScoreValid func(float64) bool,
-	scoreFn lnr.ScoreFn,
-	gfn geom.GeometryFn,
-	EpsilonDist float64,
+    hulls []*node.Node,
+    hulldb *db.DB,
+    vertexSet *sset.SSet,
+    unmerged map[[2]int]*node.Node,
+    fragmentSize int,
+    isScoreValid func(float64) bool,
+    scoreFn lnr.ScoreFn,
+    gfn geom.GeometryFn,
+    EpsilonDist float64,
 ) ([]*node.Node, []*node.Node) {
 
-	//@formatter:off
+    //@formatter:off
 	var keep = make([]*node.Node, 0)
 	var rm = make([]*node.Node, 0)
 
