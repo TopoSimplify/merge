@@ -12,9 +12,13 @@ import (
 	"github.com/intdxdt/sset"
 	"github.com/intdxdt/rtree"
 	"github.com/franela/goblin"
+	"simplex/common"
 )
 
 const epsilonDist = 1.0e-5
+var hullGeom = common.HullGeom
+var linearCoords = common.LinearCoords
+var createHulls = common.CreateHulls
 
 //@formatter:off
 func TestMergeNode(t *testing.T) {
