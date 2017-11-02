@@ -1,33 +1,22 @@
 package merge
 
 import (
-    "sort"
     "simplex/rng"
     "simplex/node"
     "simplex/lnr"
     "simplex/knn"
+	"simplex/common"
     "github.com/intdxdt/sset"
     "github.com/intdxdt/rtree"
     "github.com/intdxdt/geom"
+	"sort"
 )
 
-func sortInts(iter []int) []int {
-    sort.Ints(iter)
-    return iter
-}
 
-//node.Nodes from Rtree boxes
-func nodesFromBoxes(iter []rtree.BoxObj) *node.Nodes {
-    var self = node.NewNodes(len(iter))
-    for _, h := range iter {
-        self.Push(h.(*node.Node))
-    }
-    return self
-}
 
 //Merge two ranges
 func Range(ra, rb *rng.Range) *rng.Range {
-    var ranges = sortInts(append(ra.AsSlice(), rb.AsSlice()...))
+    var ranges = common.SortInts(append(ra.AsSlice(), rb.AsSlice()...))
     // i...[ra]...k...[rb]...j
     return rng.NewRange(ranges[0], ranges[len(ranges)-1])
 }
@@ -52,8 +41,9 @@ func ContiguousCoordinates(ha, hb *node.Node) []*geom.Point {
     if !ha.Range.Contiguous(hb.Range) {
         panic("node are not contiguous")
     }
-    var nodes = node.NewNodes().Push(ha).Push(hb).Sort()
-    var na, nb = nodes.Get(0), nodes.Get(1)
+    var nodes = []*node.Node{ha, hb}
+    sort.Sort(node.Nodes(nodes))
+    var na, nb = nodes [0], nodes[1]
     var coordinates = na.Coordinates()
     var n = len(coordinates) - 1
     coordinates = append(coordinates[:n:n], nb.Coordinates()...)
@@ -110,9 +100,10 @@ func ContiguousFragmentsBySize(
 		}
 
 		// sort hulls for consistency
-		var hs = nodesFromBoxes(knn.FindNodeNeighbours(hulldb, h, EpsilonDist)).Sort()
+		var hs = common.NodesFromBoxes(knn.FindNodeNeighbours(hulldb, h, EpsilonDist))
+		sort.Sort(node.Nodes(hs))
 
-		for _, s := range hs.DataView() {
+		for _, s := range hs {
 			sr := s.Range
 			if isMerged(sr) {
 				continue
