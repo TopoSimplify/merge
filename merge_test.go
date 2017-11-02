@@ -12,7 +12,6 @@ import (
 	"github.com/intdxdt/sset"
 	"github.com/intdxdt/rtree"
 	"github.com/franela/goblin"
-	"simplex/db"
 )
 
 const epsilonDist = 1.0e-5
@@ -93,7 +92,7 @@ func TestMergeNode(t *testing.T) {
 
 			g.Assert(len(splits)).Equal(3)
 
-			var hulldb = db.NewDB(8)
+			var hulldb = rtree.NewRTree(8)
 			var boxes = make([]rtree.BoxObj, len(splits))
 			for i, v := range splits {
 				boxes[i] = v
@@ -113,7 +112,7 @@ func TestMergeNode(t *testing.T) {
 			splits = split.AtIndex(hull, []int{0, 5, 6, 7, 8, 12}, hullGeom)
 			g.Assert(len(splits)).Equal(5)
 
-			hulldb = db.NewDB(8)
+			hulldb = rtree.NewRTree(8)
 			boxes = make([]rtree.BoxObj, len(splits))
 			for i, v := range splits {
 				boxes[i] = v

@@ -6,7 +6,6 @@ import (
     "simplex/node"
     "simplex/lnr"
     "simplex/knn"
-    "simplex/db"
     "github.com/intdxdt/sset"
     "github.com/intdxdt/rtree"
     "github.com/intdxdt/geom"
@@ -75,7 +74,7 @@ func contiguousFragments(
 //Merge contiguous hulls by fragment size
 func ContiguousFragmentsBySize(
     hulls []*node.Node,
-    hulldb *db.DB,
+    hulldb *rtree.RTree,
     vertexSet *sset.SSet,
     unmerged map[[2]int]*node.Node,
     fragmentSize int,
