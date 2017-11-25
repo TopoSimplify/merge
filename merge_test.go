@@ -38,8 +38,8 @@ func TestMergeNode(t *testing.T) {
 			}, gfn)
 			g.Assert(n != nil)
 
-			g.Assert(ContiguousCoordinates(hulls[0], hulls[1])).Equal(coords[0:hulls[1].Range.J()+1])
-			g.Assert(ContiguousCoordinates(hulls[2], hulls[1])).Equal(coords[hulls[1].Range.I():hulls[2].Range.J()+1])
+			g.Assert(ContiguousCoordinates(hulls[0], hulls[1])).Equal(coords[0:hulls[1].Range.J+1])
+			g.Assert(ContiguousCoordinates(hulls[2], hulls[1])).Equal(coords[hulls[1].Range.I:hulls[2].Range.J+1])
 		})
 		g.It("should test merge non contiguous", func() {
 			defer func() {
@@ -90,8 +90,8 @@ func TestMergeNode(t *testing.T) {
 			var hull = createHulls([][]int{{0, n}}, coords)[0]
 			var ha, hb = split.AtScoreSelection(hull, homo.Score, hullGeom)
 			var splits = split.AtIndex(hull, []int{
-				ha.Range.I(), ha.Range.J(), hb.Range.I(),
-				hb.Range.I() - 1, hb.Range.J(),
+				ha.Range.I, ha.Range.J, hb.Range.I,
+				hb.Range.I - 1, hb.Range.J,
 			}, hullGeom)
 
 			g.Assert(len(splits)).Equal(3)

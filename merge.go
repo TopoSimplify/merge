@@ -115,8 +115,8 @@ func ContiguousFragmentsBySize(
 			//if the location at which they are contiguous is not part of vertex set then
 			//its mergeable : mergeable score <= threshold
 			var mergeable = (
-				(hr.J() == sr.I() && !vertexSet.Contains(sr.I())) ||
-				(hr.I() == sr.J() && !vertexSet.Contains(sr.J())))
+				(hr.J == sr.I && !vertexSet.Contains(sr.I)) ||
+				(hr.I == sr.J && !vertexSet.Contains(sr.J)))
 
 			if mergeable {
 				var _, val = scoreFn(ContiguousCoordinates(s, h))
