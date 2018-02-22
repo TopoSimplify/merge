@@ -1,6 +1,7 @@
 package merge
 
 import (
+	"sort"
 	"simplex/rng"
 	"simplex/node"
 	"simplex/lnr"
@@ -9,7 +10,6 @@ import (
 	"github.com/intdxdt/sset"
 	"github.com/intdxdt/rtree"
 	"github.com/intdxdt/geom"
-	"sort"
 )
 
 //Merge two ranges
@@ -22,8 +22,7 @@ func Range(ra, rb *rng.Range) *rng.Range {
 //Merge contiguous fragments based combined score
 func ContiguousFragmentsAtThreshold(
 	scoreFn lnr.ScoreFn, ha, hb *node.Node,
-	scoreRelation func(float64) bool, gfn geom.GeometryFn,
-) *node.Node {
+	scoreRelation func(float64) bool, gfn geom.GeometryFn) *node.Node {
 	if !ha.Range.Contiguous(hb.Range) {
 		panic("node are not contiguous")
 	}
@@ -39,8 +38,7 @@ func ContiguousCoordinates(ha, hb *node.Node) []*geom.Point {
 	if !ha.Range.Contiguous(hb.Range) {
 		panic("node are not contiguous")
 	}
-	//var nodes = []*node.Node{ha, hb}
-	//sort.Sort(node.Nodes(nodes))
+
 	if hb.Range.I < ha.Range.J && hb.Range.J == ha.Range.I {
 		ha, hb = hb, ha
 	}
@@ -53,10 +51,9 @@ func ContiguousCoordinates(ha, hb *node.Node) []*geom.Point {
 
 //Merge contiguous hulls
 func contiguousFragments(
-	coordinates []*geom.Point,
-	ha, hb *node.Node,
-	gfn geom.GeometryFn,
-) *node.Node {
+	coordinates []*geom.Point, ha, hb *node.Node,
+	gfn geom.GeometryFn) *node.Node {
+
 	var r = Range(ha.Range, hb.Range)
 	// i...[ha]...k...[hb]...j
 	return node.New(coordinates, r, gfn)
@@ -72,8 +69,7 @@ func ContiguousFragmentsBySize(
 	isScoreValid func(float64) bool,
 	scoreFn lnr.ScoreFn,
 	gfn geom.GeometryFn,
-	EpsilonDist float64,
-) ([]*node.Node, []*node.Node) {
+	EpsilonDist float64) ([]*node.Node, []*node.Node) {
 
 	//@formatter:off
 	var keep = make([]*node.Node, 0)
@@ -117,7 +113,7 @@ func ContiguousFragmentsBySize(
 			//its mergeable : mergeable score <= threshold
 			var mergeable = (
 				(hr.J == sr.I && !vertexSet.Contains(sr.I)) ||
-					(hr.I == sr.J && !vertexSet.Contains(sr.J)))
+				(hr.I == sr.J && !vertexSet.Contains(sr.J)))
 
 			if mergeable {
 				var _, val = scoreFn(ContiguousCoordinates(s, h))
