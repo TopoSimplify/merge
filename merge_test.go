@@ -8,14 +8,13 @@ import (
 	"simplex/opts"
 	"simplex/split"
 	"simplex/offset"
-	"github.com/intdxdt/cmp"
-	"github.com/intdxdt/sset"
+	"simplex/common"
 	"github.com/intdxdt/rtree"
 	"github.com/franela/goblin"
-	"simplex/common"
 )
 
 const epsilonDist = 1.0e-5
+
 var hullGeom = common.HullGeom
 var linearCoords = common.LinearCoords
 var createHulls = common.CreateHulls
@@ -103,11 +102,11 @@ func TestMergeNode(t *testing.T) {
 			}
 			hulldb.Load(boxes)
 
-			vertex_set := sset.NewSSet(cmp.Int)
+			var vertexSet = make(map[int]bool)
 			var unmerged = make(map[[2]int]*node.Node, 0)
 
 			var keep, rm = ContiguousFragmentsBySize(
-				splits, hulldb, vertex_set, unmerged, 1,
+				splits, hulldb, vertexSet, unmerged, 1,
 				isScoreRelateValid, homo.Score, hullGeom, epsilonDist)
 
 			g.Assert(len(keep)).Equal(2)
@@ -123,11 +122,11 @@ func TestMergeNode(t *testing.T) {
 			}
 			hulldb.Load(boxes)
 
-			vertex_set = sset.NewSSet(cmp.Int)
+			vertexSet = make(map[int]bool)
 			unmerged = make(map[[2]int]*node.Node, 0)
 
 			keep, rm = ContiguousFragmentsBySize(
-				splits, hulldb, vertex_set, unmerged, 1,
+				splits, hulldb, vertexSet, unmerged, 1,
 				isScoreRelateValid, homo.Score, hullGeom, epsilonDist)
 
 			g.Assert(len(keep)).Equal(3)

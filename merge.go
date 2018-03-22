@@ -7,7 +7,6 @@ import (
 	"simplex/lnr"
 	"simplex/knn"
 	"simplex/common"
-	"github.com/intdxdt/sset"
 	"github.com/intdxdt/rtree"
 	"github.com/intdxdt/geom"
 )
@@ -63,7 +62,7 @@ func contiguousFragments(
 func ContiguousFragmentsBySize(
 	hulls []*node.Node,
 	hulldb *rtree.RTree,
-	vertexSet *sset.SSet,
+	vertexSet map[int]bool,
 	unmerged map[[2]int]*node.Node,
 	fragmentSize int,
 	isScoreValid func(float64) bool,
@@ -111,9 +110,7 @@ func ContiguousFragmentsBySize(
 			//tests for contiguous and whether contiguous index is part of vertex set
 			//if the location at which they are contiguous is not part of vertex set then
 			//its mergeable : mergeable score <= threshold
-			var mergeable = (
-				(hr.J == sr.I && !vertexSet.Contains(sr.I)) ||
-				(hr.I == sr.J && !vertexSet.Contains(sr.J)))
+			var mergeable = (hr.J == sr.I && !vertexSet[sr.I]) || (hr.I == sr.J && !vertexSet[sr.J])
 
 			if mergeable {
 				var _, val = scoreFn(ContiguousCoordinates(s, h))
