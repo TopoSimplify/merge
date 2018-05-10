@@ -1,6 +1,6 @@
 # merge 
 
-merge supolyline fragments (node)
+merge node fragments
 
 # lic 
 
