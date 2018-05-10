@@ -2,11 +2,11 @@ package merge
 
 import (
 	"sort"
-	"simplex/rng"
-	"simplex/node"
-	"simplex/lnr"
-	"simplex/knn"
-	"simplex/common"
+	"github.com/TopoSimplify/rng"
+	"github.com/TopoSimplify/node"
+	"github.com/TopoSimplify/lnr"
+	"github.com/TopoSimplify/knn"
+	"github.com/TopoSimplify/common"
 	"github.com/intdxdt/rtree"
 	"github.com/intdxdt/geom"
 )

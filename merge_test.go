@@ -3,12 +3,12 @@ package merge
 import (
 	"time"
 	"testing"
-	"simplex/dp"
-	"simplex/node"
-	"simplex/opts"
-	"simplex/split"
-	"simplex/offset"
-	"simplex/common"
+	"github.com/TopoSimplify/dp"
+	"github.com/TopoSimplify/node"
+	"github.com/TopoSimplify/opts"
+	"github.com/TopoSimplify/split"
+	"github.com/TopoSimplify/offset"
+	"github.com/TopoSimplify/common"
 	"github.com/intdxdt/rtree"
 	"github.com/franela/goblin"
 )
