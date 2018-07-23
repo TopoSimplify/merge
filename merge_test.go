@@ -96,9 +96,9 @@ func TestMergeNode(t *testing.T) {
 			g.Assert(len(splits)).Equal(3)
 
 			var hulldb = rtree.NewRTree(8)
-			var boxes = make([]rtree.BoxObj, len(splits))
-			for i, v := range splits {
-				boxes[i] = v
+			var boxes = make([]*rtree.Obj, 0, len(splits))
+			for i := range splits {
+				boxes = append(boxes, rtree.Object(i, splits[i].Bounds(), splits[i]))
 			}
 			hulldb.Load(boxes)
 
@@ -116,7 +116,7 @@ func TestMergeNode(t *testing.T) {
 			g.Assert(len(splits)).Equal(5)
 
 			hulldb = rtree.NewRTree(8)
-			boxes = make([]rtree.BoxObj, len(splits))
+			boxes = make([]*rtree.Obj, len(splits))
 			for i, v := range splits {
 				boxes[i] = v
 			}

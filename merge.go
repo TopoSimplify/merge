@@ -12,10 +12,10 @@ import (
 )
 
 //Merge two ranges
-func Range(ra, rb *rng.Range) *rng.Range {
+func Range(ra, rb rng.Rng) rng.Rng {
 	var ranges = common.SortInts(append(ra.AsSlice(), rb.AsSlice()...))
 	// i...[ra]...k...[rb]...j
-	return rng.NewRange(ranges[0], ranges[len(ranges)-1])
+	return rng.Range(ranges[0], ranges[len(ranges)-1])
 }
 
 //Merge contiguous fragments based combined score
@@ -26,14 +26,14 @@ func ContiguousFragmentsAtThreshold(
 		panic("node are not contiguous")
 	}
 	var coordinates = ContiguousCoordinates(ha, hb)
-	_, val := scoreFn(coordinates)
+	var _, val = scoreFn(coordinates)
 	if scoreRelation(val) {
 		return contiguousFragments(coordinates, ha, hb, gfn)
 	}
 	return nil
 }
 
-func ContiguousCoordinates(ha, hb *node.Node) []*geom.Point {
+func ContiguousCoordinates(ha, hb *node.Node) []geom.Point {
 	if !ha.Range.Contiguous(hb.Range) {
 		panic("node are not contiguous")
 	}
@@ -50,7 +50,7 @@ func ContiguousCoordinates(ha, hb *node.Node) []*geom.Point {
 
 //Merge contiguous hulls
 func contiguousFragments(
-	coordinates []*geom.Point, ha, hb *node.Node,
+	coordinates []geom.Point, ha, hb *node.Node,
 	gfn geom.GeometryFn) *node.Node {
 
 	var r = Range(ha.Range, hb.Range)
@@ -77,14 +77,13 @@ func ContiguousFragmentsBySize(
 	var hdict = make(map[[2]int]*node.Node, 0)
 	var mrgdict = make(map[[2]int]*node.Node, 0)
 
-	var isMerged = func(o *rng.Range) bool {
+	var isMerged = func(o rng.Rng) bool {
 		_, ok := mrgdict[o.AsArray()]
 		return ok
 	}
 
 	for _, h := range hulls {
-		hr := h.Range
-
+		var hr = h.Range
 		if isMerged(hr) {
 			continue
 		}
@@ -96,7 +95,7 @@ func ContiguousFragmentsBySize(
 		}
 
 		// sort hulls for consistency
-		var hs = common.NodesFromBoxes(knn.FindNodeNeighbours(hulldb, h, EpsilonDist))
+		var hs = common.NodesFromObjects(knn.FindNodeNeighbours(hulldb, h, EpsilonDist))
 		sort.Sort(node.Nodes(hs))
 
 		for _, s := range hs {
