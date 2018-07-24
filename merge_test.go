@@ -37,8 +37,8 @@ func TestMergeNode(t *testing.T) {
 			}, gfn)
 			g.Assert(n != nil)
 
-			g.Assert(ContiguousCoordinates(hulls[0], hulls[1])).Equal(coords[0:hulls[1].Range.J+1])
-			g.Assert(ContiguousCoordinates(hulls[2], hulls[1])).Equal(coords[hulls[1].Range.I:hulls[2].Range.J+1])
+			g.Assert(ContiguousCoordinates(hulls[0], hulls[1])).Equal(coords[0 : hulls[1].Range.J+1])
+			g.Assert(ContiguousCoordinates(hulls[2], hulls[1])).Equal(coords[hulls[1].Range.I : hulls[2].Range.J+1])
 		})
 		g.It("should test merge non contiguous", func() {
 			defer func() {
@@ -116,9 +116,9 @@ func TestMergeNode(t *testing.T) {
 			g.Assert(len(splits)).Equal(5)
 
 			hulldb = rtree.NewRTree(8)
-			boxes = make([]*rtree.Obj, len(splits))
-			for i, v := range splits {
-				boxes[i] = v
+			boxes = make([]*rtree.Obj, 0, len(splits))
+			for i := range splits {
+				boxes = append(boxes, rtree.Object(i, splits[i].Bounds(), splits[i]))
 			}
 			hulldb.Load(boxes)
 
