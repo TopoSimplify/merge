@@ -7,8 +7,8 @@ import (
 	"github.com/TopoSimplify/lnr"
 	"github.com/TopoSimplify/knn"
 	"github.com/TopoSimplify/common"
-	"github.com/intdxdt/rtree"
 	"github.com/intdxdt/geom"
+	"github.com/TopoSimplify/hdb"
 )
 
 //Merge two ranges
@@ -61,7 +61,7 @@ func contiguousFragments(
 //Merge contiguous hulls by fragment size
 func ContiguousFragmentsBySize(
 	hulls []*node.Node,
-	hulldb *rtree.RTree,
+	hulldb *hdb.Hdb,
 	vertexSet map[int]bool,
 	unmerged map[[2]int]*node.Node,
 	fragmentSize int,
@@ -95,7 +95,7 @@ func ContiguousFragmentsBySize(
 		}
 
 		// sort hulls for consistency
-		var hs = common.NodesFromObjects(knn.FindNodeNeighbours(hulldb, h, EpsilonDist))
+		var hs = knn.FindNodeNeighbours(hulldb, h, EpsilonDist)
 		sort.Sort(node.Nodes(hs))
 
 		for _, s := range hs {

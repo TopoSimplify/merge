@@ -9,8 +9,8 @@ import (
 	"github.com/TopoSimplify/split"
 	"github.com/TopoSimplify/offset"
 	"github.com/TopoSimplify/common"
-	"github.com/intdxdt/rtree"
 	"github.com/franela/goblin"
+	"github.com/TopoSimplify/hdb"
 )
 
 const epsilonDist = 1.0e-5
@@ -95,12 +95,7 @@ func TestMergeNode(t *testing.T) {
 
 			g.Assert(len(splits)).Equal(3)
 
-			var hulldb = rtree.NewRTree(8)
-			var boxes = make([]*rtree.Obj, 0, len(splits))
-			for i := range splits {
-				boxes = append(boxes, rtree.Object(i, splits[i].Bounds(), splits[i]))
-			}
-			hulldb.Load(boxes)
+			var hulldb = hdb.NewHdb().Load(splits)
 
 			var vertexSet = make(map[int]bool)
 			var unmerged = make(map[[2]int]*node.Node, 0)
@@ -115,12 +110,7 @@ func TestMergeNode(t *testing.T) {
 			splits = split.AtIndex(hull, []int{0, 5, 6, 7, 8, 12}, hullGeom)
 			g.Assert(len(splits)).Equal(5)
 
-			hulldb = rtree.NewRTree(8)
-			boxes = make([]*rtree.Obj, 0, len(splits))
-			for i := range splits {
-				boxes = append(boxes, rtree.Object(i, splits[i].Bounds(), splits[i]))
-			}
-			hulldb.Load(boxes)
+			hulldb = hdb.NewHdb().Load(splits)
 
 			vertexSet = make(map[int]bool)
 			unmerged = make(map[[2]int]*node.Node, 0)
