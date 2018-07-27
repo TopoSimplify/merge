@@ -21,16 +21,16 @@ func Range(ra, rb rng.Rng) rng.Rng {
 //Merge contiguous fragments based combined score
 func ContiguousFragmentsAtThreshold(
 	scoreFn lnr.ScoreFn, ha, hb *node.Node,
-	scoreRelation func(float64) bool, gfn geom.GeometryFn) *node.Node {
+	scoreRelation func(float64) bool, gfn geom.GeometryFn) (bool, node.Node) {
 	if !ha.Range.Contiguous(hb.Range) {
 		panic("node are not contiguous")
 	}
 	var coordinates = ContiguousCoordinates(ha, hb)
 	var _, val = scoreFn(coordinates)
 	if scoreRelation(val) {
-		return contiguousFragments(coordinates, ha, hb, gfn)
+		return true, contiguousFragments(coordinates, ha, hb, gfn)
 	}
-	return nil
+	return false, node.Node{}
 }
 
 func ContiguousCoordinates(ha, hb *node.Node) []geom.Point {
@@ -49,18 +49,14 @@ func ContiguousCoordinates(ha, hb *node.Node) []geom.Point {
 }
 
 //Merge contiguous hulls
-func contiguousFragments(
-	coordinates []geom.Point, ha, hb *node.Node,
-	gfn geom.GeometryFn) *node.Node {
-
-	var r = Range(ha.Range, hb.Range)
+func contiguousFragments(coordinates []geom.Point, ha, hb *node.Node, gfn geom.GeometryFn) node.Node {
 	// i...[ha]...k...[hb]...j
-	return node.New(coordinates, r, gfn)
+	return node.CreateNode(coordinates, Range(ha.Range, hb.Range), gfn)
 }
 
 //Merge contiguous hulls by fragment size
 func ContiguousFragmentsBySize(
-	hulls []*node.Node,
+	hulls []node.Node,
 	hulldb *hdb.Hdb,
 	vertexSet map[int]bool,
 	unmerged map[[2]int]*node.Node,
@@ -82,7 +78,8 @@ func ContiguousFragmentsBySize(
 		return ok
 	}
 
-	for _, h := range hulls {
+	for i := range hulls {
+		var h  = &hulls[i]
 		var hr = h.Range
 		if isMerged(hr) {
 			continue
@@ -96,9 +93,10 @@ func ContiguousFragmentsBySize(
 
 		// sort hulls for consistency
 		var hs = knn.FindNodeNeighbours(hulldb, h, EpsilonDist)
-		sort.Sort(node.Nodes(hs))
+		sort.Sort(node.NodePtrs(hs))
 
-		for _, s := range hs {
+		for i := range hs {
+			s  := hs[i]
 			sr := s.Range
 			if isMerged(sr) {
 				continue
@@ -130,8 +128,10 @@ func ContiguousFragmentsBySize(
 			delete(hdict, hr.AsArray())
 			//merged range
 			var coords, r = ContiguousCoordinates(h, s), Range(sr, hr)
+
+			var _nd = node.CreateNode(coords, r, gfn)
 			// add merge
-			hdict[r.AsArray()] = node.New(coords, r, gfn)
+			hdict[r.AsArray()] = &_nd
 
 			// add to remove list to remove , after merge
 			rm = append(rm, s)
