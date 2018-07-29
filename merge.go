@@ -9,6 +9,7 @@ import (
 	"github.com/TopoSimplify/common"
 	"github.com/intdxdt/geom"
 	"github.com/TopoSimplify/hdb"
+	"github.com/intdxdt/iter"
 )
 
 //Merge two ranges
@@ -20,7 +21,7 @@ func Range(ra, rb rng.Rng) rng.Rng {
 
 //Merge contiguous fragments based combined score
 func ContiguousFragmentsAtThreshold(
-	scoreFn lnr.ScoreFn, ha, hb *node.Node,
+	id *iter.Igen, scoreFn lnr.ScoreFn, ha, hb *node.Node,
 	scoreRelation func(float64) bool, gfn geom.GeometryFn) (bool, node.Node) {
 	if !ha.Range.Contiguous(hb.Range) {
 		panic("node are not contiguous")
@@ -28,7 +29,7 @@ func ContiguousFragmentsAtThreshold(
 	var coordinates = ContiguousCoordinates(ha, hb)
 	var _, val = scoreFn(coordinates)
 	if scoreRelation(val) {
-		return true, contiguousFragments(coordinates, ha, hb, gfn)
+		return true, contiguousFragments(id, coordinates, ha, hb, gfn)
 	}
 	return false, node.Node{}
 }
@@ -49,13 +50,14 @@ func ContiguousCoordinates(ha, hb *node.Node) []geom.Point {
 }
 
 //Merge contiguous hulls
-func contiguousFragments(coordinates []geom.Point, ha, hb *node.Node, gfn geom.GeometryFn) node.Node {
+func contiguousFragments(id *iter.Igen, coordinates []geom.Point, ha, hb *node.Node, gfn geom.GeometryFn) node.Node {
 	// i...[ha]...k...[hb]...j
-	return node.CreateNode(coordinates, Range(ha.Range, hb.Range), gfn)
+	return node.CreateNode(id, coordinates, Range(ha.Range, hb.Range), gfn)
 }
 
 //Merge contiguous hulls by fragment size
 func ContiguousFragmentsBySize(
+	id *iter.Igen,
 	hulls []node.Node,
 	hulldb *hdb.Hdb,
 	vertexSet map[int]bool,
@@ -79,7 +81,7 @@ func ContiguousFragmentsBySize(
 	}
 
 	for i := range hulls {
-		var h  = &hulls[i]
+		var h = &hulls[i]
 		var hr = h.Range
 		if isMerged(hr) {
 			continue
@@ -96,7 +98,7 @@ func ContiguousFragmentsBySize(
 		sort.Sort(node.NodePtrs(hs))
 
 		for i := range hs {
-			s  := hs[i]
+			s := hs[i]
 			sr := s.Range
 			if isMerged(sr) {
 				continue
@@ -129,7 +131,7 @@ func ContiguousFragmentsBySize(
 			//merged range
 			var coords, r = ContiguousCoordinates(h, s), Range(sr, hr)
 
-			var _nd = node.CreateNode(coords, r, gfn)
+			var _nd = node.CreateNode(id, coords, r, gfn)
 			// add merge
 			hdict[r.AsArray()] = &_nd
 
