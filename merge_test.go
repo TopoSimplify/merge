@@ -16,7 +16,7 @@ import (
 
 const epsilonDist = 1.0e-5
 
-var hullGeom = common.HullGeom
+var hullGeom = common.Geometry
 var linearCoords = common.LinearCoords
 var createHulls = common.CreateHulls
 
@@ -28,7 +28,7 @@ func TestMergeNode(t *testing.T) {
 		g.It("should test merge at threshold", func() {
 			//checks if score is valid at threshold of constrained dp
 			var coords = linearCoords("LINESTRING ( 960 840, 980 840, 980 880, 1020 900, 1080 880, 1120 860, 1160 800, 1160 760, 1140 700, 1080 700, 1040 720, 1060 760, 1120 800, 1080 840, 1020 820, 940 760 )")
-			var hulls = createHulls(id, [][]int{{0, 2}, {2, 6}, {6, 8}, {8, 10}, {10, 12}, {12, len(coords) - 1}}, coords)
+			var hulls = createHulls(id, [][]int{{0, 2}, {2, 6}, {6, 8}, {8, 10}, {10, 12}, {12, coords.Len() - 1}}, coords)
 			var gfn = hullGeom
 			var bln, n = ContiguousFragmentsAtThreshold(id, offset.MaxOffset, &hulls[0], &hulls[1], func(val float64) bool {
 				return val <= 50.0
@@ -41,8 +41,8 @@ func TestMergeNode(t *testing.T) {
 			}, gfn)
 			g.Assert(bln).IsTrue()
 
-			g.Assert(ContiguousCoordinates(&hulls[0], &hulls[1])).Equal(coords[0 : hulls[1].Range.J+1])
-			g.Assert(ContiguousCoordinates(&hulls[2], &hulls[1])).Equal(coords[hulls[1].Range.I : hulls[2].Range.J+1])
+			g.Assert(ContiguousCoordinates(&hulls[0], &hulls[1])).Equal(coords.Slice(0 , hulls[1].Range.J+1))
+			g.Assert(ContiguousCoordinates(&hulls[2], &hulls[1])).Equal(coords.Slice(hulls[1].Range.I , hulls[2].Range.J+1))
 		})
 		g.It("should test merge non contiguous", func() {
 			defer func() {
@@ -50,7 +50,7 @@ func TestMergeNode(t *testing.T) {
 			}()
 			//checks if score is valid at threshold of constrained dp
 			var coords = linearCoords("LINESTRING ( 960 840, 980 840, 980 880, 1020 900, 1080 880, 1120 860, 1160 800, 1160 760, 1140 700, 1080 700, 1040 720, 1060 760, 1120 800, 1080 840, 1020 820, 940 760 )")
-			var hulls = createHulls(id, [][]int{{0, 2}, {2, 6}, {6, 8}, {8, 10}, {10, 12}, {12, len(coords) - 1}}, coords)
+			var hulls = createHulls(id, [][]int{{0, 2}, {2, 6}, {6, 8}, {8, 10}, {10, 12}, {12, coords.Len() - 1}}, coords)
 			var gfn = hullGeom
 			ContiguousFragmentsAtThreshold(id, offset.MaxOffset, &hulls[0], &hulls[2], func(val float64) bool {
 				return val <= 100.0
@@ -63,7 +63,7 @@ func TestMergeNode(t *testing.T) {
 			}()
 			//checks if score is valid at threshold of constrained dp
 			var coords = linearCoords("LINESTRING ( 960 840, 980 840, 980 880, 1020 900, 1080 880, 1120 860, 1160 800, 1160 760, 1140 700, 1080 700, 1040 720, 1060 760, 1120 800, 1080 840, 1020 820, 940 760 )")
-			var hulls = createHulls(id, [][]int{{0, 2}, {2, 6}, {6, 8}, {8, 10}, {10, 12}, {12, len(coords) - 1}}, coords)
+			var hulls = createHulls(id, [][]int{{0, 2}, {2, 6}, {6, 8}, {8, 10}, {10, 12}, {12, coords.Len() - 1}}, coords)
 			ContiguousCoordinates(&hulls[0], &hulls[2])
 		})
 
@@ -87,7 +87,7 @@ func TestMergeNode(t *testing.T) {
 			// self.relates = relations(self)
 			var wkt = "LINESTRING ( 860 390, 810 360, 770 400, 760 420, 800 440, 810 470, 850 500, 810 530, 780 570, 760 530, 720 530, 710 500, 650 450 )"
 			var coords = linearCoords(wkt)
-			var n = len(coords) - 1
+			var n = coords.Len() - 1
 			var homo = dp.New(coords, options, offset.MaxOffset)
 
 			var hull = createHulls(id, [][]int{{0, n}}, coords)[0]

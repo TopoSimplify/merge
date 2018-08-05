@@ -22,7 +22,7 @@ func Range(ra, rb rng.Rng) rng.Rng {
 //Merge contiguous fragments based combined score
 func ContiguousFragmentsAtThreshold(
 	id *iter.Igen, scoreFn lnr.ScoreFn, ha, hb *node.Node,
-	scoreRelation func(float64) bool, gfn geom.GeometryFn) (bool, node.Node) {
+	scoreRelation func(float64) bool, gfn func(geom.Coords)geom.Geometry) (bool, node.Node) {
 	if !ha.Range.Contiguous(hb.Range) {
 		panic("node are not contiguous")
 	}
@@ -34,7 +34,7 @@ func ContiguousFragmentsAtThreshold(
 	return false, node.Node{}
 }
 
-func ContiguousCoordinates(ha, hb *node.Node) []geom.Point {
+func ContiguousCoordinates(ha, hb *node.Node) geom.Coords {
 	if !ha.Range.Contiguous(hb.Range) {
 		panic("node are not contiguous")
 	}
@@ -44,13 +44,13 @@ func ContiguousCoordinates(ha, hb *node.Node) []geom.Point {
 	}
 
 	var coordinates = ha.Coordinates()
-	var n = len(coordinates) - 1
-	coordinates = append(coordinates[:n:n], hb.Coordinates()...)
+	var n = coordinates.Len() - 1
+	coordinates.Idxs = append(coordinates.Idxs[:n:n], hb.Coordinates().Idxs...)
 	return coordinates
 }
 
 //Merge contiguous hulls
-func contiguousFragments(id *iter.Igen, coordinates []geom.Point, ha, hb *node.Node, gfn geom.GeometryFn) node.Node {
+func contiguousFragments(id *iter.Igen, coordinates geom.Coords, ha, hb *node.Node, gfn func(geom.Coords)geom.Geometry) node.Node {
 	// i...[ha]...k...[hb]...j
 	return node.CreateNode(id, coordinates, Range(ha.Range, hb.Range), gfn)
 }
@@ -65,7 +65,7 @@ func ContiguousFragmentsBySize(
 	fragmentSize int,
 	isScoreValid func(float64) bool,
 	scoreFn lnr.ScoreFn,
-	gfn geom.GeometryFn,
+	gfn func(geom.Coords)geom.Geometry,
 	EpsilonDist float64) ([]*node.Node, []*node.Node) {
 
 	//@formatter:off
