@@ -23,9 +23,11 @@ func Range(ra, rb rng.Rng) rng.Rng {
 func ContiguousFragmentsAtThreshold(
 	id *iter.Igen, scoreFn lnr.ScoreFn, ha, hb *node.Node,
 	scoreRelation func(float64) bool, gfn func(geom.Coords)geom.Geometry) (bool, node.Node) {
+
 	if !ha.Range.Contiguous(hb.Range) {
 		panic("node are not contiguous")
 	}
+
 	var coordinates = ContiguousCoordinates(ha, hb)
 	var _, val = scoreFn(coordinates)
 	if scoreRelation(val) {
@@ -50,9 +52,10 @@ func ContiguousCoordinates(ha, hb *node.Node) geom.Coords {
 }
 
 //Merge contiguous hulls
-func contiguousFragments(id *iter.Igen, coordinates geom.Coords, ha, hb *node.Node, gfn func(geom.Coords)geom.Geometry) node.Node {
+func contiguousFragments(id *iter.Igen, coordinates geom.Coords, ha, hb *node.Node,
+	gfn func(geom.Coords)geom.Geometry) node.Node {
 	// i...[ha]...k...[hb]...j
-	return node.CreateNode(id, coordinates, Range(ha.Range, hb.Range), gfn)
+	return node.CreateNode(id, coordinates, Range(ha.Range, hb.Range), gfn, ha.Instance)
 }
 
 //Merge contiguous hulls by fragment size
@@ -131,7 +134,7 @@ func ContiguousFragmentsBySize(
 			//merged range
 			var coords, r = ContiguousCoordinates(h, s), Range(sr, hr)
 
-			var _nd = node.CreateNode(id, coords, r, gfn)
+			var _nd = node.CreateNode(id, coords, r, gfn, h.Instance)
 			// add merge
 			hdict[r.AsArray()] = &_nd
 
