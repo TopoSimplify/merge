@@ -68,8 +68,7 @@ func ContiguousFragmentsBySize(
 	fragmentSize int,
 	isScoreValid func(float64) bool,
 	scoreFn lnr.ScoreFn,
-	gfn func(geom.Coords)geom.Geometry,
-	EpsilonDist float64) ([]*node.Node, []*node.Node) {
+	gfn func(geom.Coords)geom.Geometry) ([]*node.Node, []*node.Node) {
 
 	//@formatter:off
 	var keep = make([]*node.Node, 0)
@@ -97,7 +96,7 @@ func ContiguousFragmentsBySize(
 		}
 
 		// sort hulls for consistency
-		var hs = knn.FindNodeNeighbours(hulldb, h, EpsilonDist)
+		var hs = knn.FindNodeNeighbours(hulldb, h, knn.EpsilonDist)
 		sort.Sort(node.NodePtrs(hs))
 
 		for i := range hs {
@@ -142,7 +141,7 @@ func ContiguousFragmentsBySize(
 			rm = append(rm, s)
 			rm = append(rm, h)
 
-			//if present in umerged as fragment remove
+			//if present in unmerged as fragment remove
 			delete(unmerged, hr.AsArray())
 			break
 		}
