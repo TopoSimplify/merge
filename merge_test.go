@@ -12,9 +12,9 @@ import (
 	"github.com/franela/goblin"
 	"github.com/TopoSimplify/hdb"
 	"github.com/intdxdt/iter"
+	"github.com/TopoSimplify/knn"
 )
 
-const epsilonDist = 1.0e-5
 
 var hullGeom = common.Geometry
 var linearCoords = common.LinearCoords
@@ -118,7 +118,7 @@ func TestMergeNode(t *testing.T) {
 
 			var keep, rm = ContiguousFragmentsBySize(
 				id, splits, hulldb, vertexSet, unmerged, 1,
-				isScoreRelateValid, homo.Score, hullGeom, epsilonDist)
+				isScoreRelateValid, homo.Score, hullGeom, knn.EpsilonDist)
 
 			g.Assert(len(keep)).Equal(2)
 			g.Assert(len(rm)).Equal(2)
@@ -133,7 +133,7 @@ func TestMergeNode(t *testing.T) {
 
 			keep, rm = ContiguousFragmentsBySize(
 				id, splits, hulldb, vertexSet, unmerged, 1,
-				isScoreRelateValid, homo.Score, hullGeom, epsilonDist)
+				isScoreRelateValid, homo.Score, hullGeom, knn.EpsilonDist)
 
 			g.Assert(len(keep)).Equal(3)
 			g.Assert(len(rm)).Equal(4)
