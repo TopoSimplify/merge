@@ -96,7 +96,7 @@ func ContiguousFragmentsBySize(
 		}
 
 		// sort hulls for consistency
-		var hs = knn.FindNodeNeighbours(hulldb, h, knn.EpsilonDist)
+		var hs = knn.NodeNeighbours(hulldb, h, knn.EpsilonDist)
 		sort.Sort(node.NodePtrs(hs))
 
 		for i := range hs {
