@@ -14,7 +14,6 @@ import (
 	"time"
 )
 
-
 var hullGeom = common.Geometry
 var linearCoords = common.LinearCoords
 var createHulls = common.CreateHulls

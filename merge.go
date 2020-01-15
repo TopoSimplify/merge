@@ -38,7 +38,7 @@ func ContiguousFragmentsAtThreshold(
 
 func ContiguousCoordinates(ha, hb *node.Node) geom.Coords {
 	if !ha.Range.Contiguous(hb.Range) {
-		panic("node are not contiguous")
+		panic("nodes are not contiguous")
 	}
 
 	if hb.Range.I < ha.Range.J && hb.Range.J == ha.Range.I {
