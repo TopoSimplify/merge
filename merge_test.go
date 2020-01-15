@@ -1,17 +1,17 @@
 package merge
 
 import (
-	"time"
-	"testing"
+	"github.com/TopoSimplify/common"
 	"github.com/TopoSimplify/dp"
+	"github.com/TopoSimplify/hdb"
 	"github.com/TopoSimplify/node"
+	"github.com/TopoSimplify/offset"
 	"github.com/TopoSimplify/opts"
 	"github.com/TopoSimplify/split"
-	"github.com/TopoSimplify/offset"
-	"github.com/TopoSimplify/common"
 	"github.com/franela/goblin"
-	"github.com/TopoSimplify/hdb"
 	"github.com/intdxdt/iter"
+	"testing"
+	"time"
 )
 
 
