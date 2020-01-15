@@ -1,15 +1,15 @@
 package merge
 
 import (
-	"sort"
-	"github.com/TopoSimplify/rng"
-	"github.com/TopoSimplify/node"
-	"github.com/TopoSimplify/lnr"
-	"github.com/TopoSimplify/knn"
 	"github.com/TopoSimplify/common"
-	"github.com/intdxdt/geom"
 	"github.com/TopoSimplify/hdb"
+	"github.com/TopoSimplify/knn"
+	"github.com/TopoSimplify/lnr"
+	"github.com/TopoSimplify/node"
+	"github.com/TopoSimplify/rng"
+	"github.com/intdxdt/geom"
 	"github.com/intdxdt/iter"
+	"sort"
 )
 
 //Merge two ranges
